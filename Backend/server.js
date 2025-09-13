@@ -3,7 +3,8 @@ import dotenv from "dotenv";
 import { errorHandler, notFound } from "./middleware/errorMiddleware.js";
 import connectDB from "./DB/db.js";
 import cookieParser from "cookie-parser";
-import userRoutes from "./routes/userRoutes.js";
+import userRoutes from "./Routes/userRoutes.js";
+import examRoutes from "./Routes/examRoutes.js";
 dotenv.config();
 connectDB();
 const app = express();
@@ -16,6 +17,7 @@ app.use(cookieParser());
 
 // Routes
 app.use("/api/users", userRoutes);
+app.use("/api/users", examRoutes);
 
 // Custom Middlewares
 app.use(notFound);
