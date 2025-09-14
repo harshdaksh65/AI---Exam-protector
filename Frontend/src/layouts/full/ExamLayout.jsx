@@ -1,25 +1,44 @@
 import React, { useState } from 'react';
+import { styled, Box } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 
 import Header from './header/Header';
-import Sidebar from './sidebar/Sidebar';
+
+
+const PageWrapper = styled('div')(() => ({
+  // display: 'flex',
+  // flexGrow: 1,
+  // paddingBottom: '60px',
+  // flexDirection: 'column',
+  // zIndex: 1,
+  // backgroundColor: 'black',
+}));
 
 const ExamLayout = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  // const lgUp = useMediaQuery((theme) => theme.breakpoints.up("lg"));
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-black z-10 pb-16">
-      {/* Header */}
-      <Header
-        toggleSidebar={() => setSidebarOpen(!isSidebarOpen)}
-        toggleMobileSidebar={() => setMobileSidebarOpen(true)}
-      />
-      {/* Page Content */}
-      <div className="flex-grow flex flex-col">
+    <Box>
+      {/* ------------------------------------------- */}
+      {/* ------------------------------------------- */}
+      {/* Main Wrapper */}
+      {/* ------------------------------------------- */}
+      <PageWrapper>
+        {/* ------------------------------------------- */}
+        {/* Header */}
+        {/* ------------------------------------------- */}
+        <Header
+          toggleSidebar={() => setSidebarOpen(!isSidebarOpen)}
+          toggleMobileSidebar={() => setMobileSidebarOpen(true)}
+        />
+        {/* ------------------------------------------- */}
+        {/* PageContent */}
+        {/* ------------------------------------------- */}
         <Outlet />
-      </div>
-    </div>
+      </PageWrapper>
+    </Box>
   );
 };
 

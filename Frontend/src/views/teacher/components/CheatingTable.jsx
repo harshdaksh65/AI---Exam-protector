@@ -1,80 +1,146 @@
-import React, { useState } from 'react';
-
-function createData(
-  name,
-  email,
-  tabChange,
-  prohibitedKeyPress,
-  multipleFaceDetected,
-  mobileFound,
-  prohibitedObjectDetected,
-) {
-  return {
-    name,
-    email,
-    tabChange,
-    prohibitedKeyPress,
-    multipleFaceDetected,
-    mobileFound,
-    prohibitedObjectDetected,
-  };
-}
-
-const users = [
-  createData('User 1', 'user1@example.com', 4, 2, 5, 1, 3),
-  createData('User 2', 'user2@example.com', 2, 3, 1, 5, 4),
-  createData('User 3', 'user3@example.com', 5, 1, 3, 2, 4),
-  createData('User 4', 'user4@example.com', 3, 4, 2, 4, 5),
-  createData('User 5', 'user5@example.com', 1, 5, 4, 3, 2),
-];
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useUpdateResultStatusMutation } from 'src/slices/resultApiSlice';
+import {
+  Box,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+  TextField,
+  Select,
+  MenuItem,
+} from '@mui/material';
+import { useGetExamsQuery } from 'src/slices/examApiSlice';
+import { useGetCheatingLogsQuery } from 'src/slices/cheatingLogApiSlice';
 
 export default function CheatingTable() {
   const [filter, setFilter] = useState('');
-  const filteredUsers = users.filter(
-    (user) =>
-      user.name.toLowerCase().includes(filter.toLowerCase()) ||
-      user.email.toLowerCase().includes(filter.toLowerCase()),
+  const [selectedExamId, setSelectedExamId] = useState('');
+  const [cheatingLogs, setCheatingLogs] = useState([]);
+  const [resultStatusMap, setResultStatusMap] = useState({});
+  const { userInfo } = useSelector((state) => state.auth); // teacher info
+  const [updateResultStatus, { isLoading: isUpdating }] = useUpdateResultStatusMutation();
+
+  const { data: examsData } = useGetExamsQuery();
+  const { data: cheatingLogsData, isLoading } = useGetCheatingLogsQuery(selectedExamId);
+
+  useEffect(() => {
+    if (examsData && examsData.length > 0) {
+      setSelectedExamId(examsData[0].examId);
+    }
+  }, [examsData]);
+
+  useEffect(() => {
+    if (cheatingLogsData) {
+      setCheatingLogs(cheatingLogsData);
+      // Initialize resultStatusMap for dropdowns
+      const initialMap = {};
+      cheatingLogsData.forEach((log) => {
+        initialMap[log._id] = log.resultStatus || 'pending';
+      });
+      setResultStatusMap(initialMap);
+    }
+  }, [cheatingLogsData]);
+
+  const filteredUsers = cheatingLogs.filter(
+    (log) =>
+      log.username.toLowerCase().includes(filter.toLowerCase()) ||
+      log.email.toLowerCase().includes(filter.toLowerCase()),
   );
 
   return (
-    <div className="max-w-5xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-xl shadow-lg">
-      <input
-        type="text"
-        placeholder="Filter by Name or Email"
-        className="w-full p-2 mb-4 rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-100"
+    <Box>
+      <Select
+        label="Select Exam"
+        value={selectedExamId}
+        onChange={(e) => {
+          setSelectedExamId(e.target.value);
+        }}
+        fullWidth
+        sx={{ mb: 2 }}
+      >
+        {examsData &&
+          examsData.map((exam) => (
+            <MenuItem key={exam.examId} value={exam.examId}>
+              {exam.examName}
+            </MenuItem>
+          ))}
+      </Select>
+      <TextField
+        label="Filter by Name or Email"
+        variant="outlined"
+        fullWidth
+        margin="normal"
         value={filter}
         onChange={(e) => setFilter(e.target.value)}
       />
-      <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 dark:border-gray-700 rounded-lg">
-          <thead className="bg-gray-100 dark:bg-gray-800">
-            <tr>
-              <th className="px-4 py-2 text-left">Sno</th>
-              <th className="px-4 py-2 text-left">Name</th>
-              <th className="px-4 py-2 text-left">Email</th>
-              <th className="px-4 py-2 text-left">Tab Change</th>
-              <th className="px-4 py-2 text-left">Prohibited Key Press</th>
-              <th className="px-4 py-2 text-left">Multiple Face Detected</th>
-              <th className="px-4 py-2 text-left">Mobile Found</th>
-              <th className="px-4 py-2 text-left">Prohibited Object Detected</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredUsers.map((user, index) => (
-              <tr key={index} className="border-t border-gray-200 dark:border-gray-700">
-                <td className="px-4 py-2">{index + 1}</td>
-                <td className="px-4 py-2">{user.name}</td>
-                <td className="px-4 py-2">{user.email}</td>
-                <td className="px-4 py-2">{user.tabChange}</td>
-                <td className="px-4 py-2">{user.prohibitedKeyPress}</td>
-                <td className="px-4 py-2">{user.multipleFaceDetected}</td>
-                <td className="px-4 py-2">{user.mobileFound}</td>
-                <td className="px-4 py-2">{user.prohibitedObjectDetected}</td>
-              </tr>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Sno</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell>Email</TableCell>
+              <TableCell>No Face Count</TableCell>
+              <TableCell>Multiple Face Count</TableCell>
+              <TableCell>Cell Phone Count</TableCell>
+              <TableCell>Prohibited Object Count</TableCell>
+              <TableCell>Result Status</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredUsers.map((log, index) => (
+              <TableRow key={index}>
+                <TableCell>{index + 1}</TableCell>
+                <TableCell>{log.username}</TableCell>
+                <TableCell>{log.email}</TableCell>
+                <TableCell>{log.noFaceCount}</TableCell>
+                <TableCell>{log.multipleFaceCount}</TableCell>
+                <TableCell>{log.cellPhoneCount}</TableCell>
+                <TableCell>{log.prohibitedObjectCount}</TableCell>
+                <TableCell>
+                  <Box display="flex" alignItems="center" gap={1}>
+                    <Select
+                      value={resultStatusMap[log._id] || 'pending'}
+                      onChange={(e) => {
+                        setResultStatusMap((prev) => ({ ...prev, [log._id]: e.target.value }));
+                      }}
+                      size="small"
+                    >
+                      <MenuItem value="pending">Pending</MenuItem>
+                      <MenuItem value="pass">Pass</MenuItem>
+                      <MenuItem value="fail">Fail</MenuItem>
+                      <MenuItem value="cheater">Cheater</MenuItem>
+                    </Select>
+                    <button
+                      style={{ padding: '4px 12px', borderRadius: '4px', background: '#615DFF', color: '#fff', border: 'none', cursor: 'pointer' }}
+                      disabled={isUpdating || !log.resultId}
+                      onClick={async () => {
+                        if (!log.resultId) {
+                          alert('Result ID missing! Cannot update status.');
+                          return;
+                        }
+                        await updateResultStatus({
+                          resultId: log.resultId, // Must be the Result document ID
+                          status: resultStatusMap[log._id],
+                          updatedBy: userInfo?._id,
+                        });
+                      }}
+                    >
+                      {!log.resultId ? 'No Result' : (isUpdating ? 'Updating...' : 'Update')}
+                    </button>
+                  </Box>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
   );
 }

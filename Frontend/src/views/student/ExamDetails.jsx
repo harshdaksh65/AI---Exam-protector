@@ -1,77 +1,184 @@
-import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import {
+  Button,
+  Card,
+  CardContent,
+  Checkbox,
+  FormControlLabel,
+  List,
+  ListItem,
+  ListItemText,
+  Radio,
+  Stack,
+  Typography,
+} from '@mui/material';
+import Grid from '@mui/material/Grid';
+import Link from '@mui/material/Link';
+import Paper from '@mui/material/Paper';
 import { uniqueId } from 'lodash';
+import * as React from 'react';
+import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useGetQuestionsQuery } from 'src/slices/examApiSlice';
 
-function Copyright() {
+function Copyright(props) {
   return (
-    <div className="text-sm text-gray-500 text-center mt-4">
-      Copyright © <a className="text-primary-600 hover:underline" href="https://mui.com/">Your Website</a> {new Date().getFullYear()}.
-    </div>
+    <Typography variant="body2" color="text.secondary" align="center" {...props}>
+      {'Copyright © '}
+      <Link color="inherit" href="https://mui.com/">
+        Your Website
+      </Link>{' '}
+      {new Date().getFullYear()}
+      {'.'}
+    </Typography>
   );
 }
 
 const DescriptionAndInstructions = () => {
   const navigate = useNavigate();
-  const { exam_id } = useParams();
-  const test_id = uniqueId();
+
+  const { examId } = useParams();
+  const { data: questions, isLoading } = useGetQuestionsQuery(examId); // Fetch questions using examId
+  // const { data: questions, isLoading } = useGetQuestionsQuery({ examId });
+
+  // fech exam data from backend
+  // pass testUnique id on start button
+  const testId = uniqueId();
+  // accetp
   const [certify, setCertify] = useState(false);
-  const handleCertifyChange = () => setCertify(!certify);
+  const handleCertifyChange = () => {
+    setCertify(!certify);
+  };
   const handleTest = () => {
-    const isValid = true;
+    // Check if the test date is valid here
+    const isValid = true; // Replace with your date validation logic
+    console.log('Test link');
     if (isValid) {
-      navigate(`/exam/${exam_id}/${test_id}`);
+      // Replace 'examid' and 'TestId' with the actual values
+      navigate(`/exam/${examId}/${testId}`);
     } else {
+      // Display an error message or handle invalid date
       toast.error('Test date is not valid.');
     }
   };
 
   return (
-    <div className="bg-white dark:bg-gray-900 shadow-xl rounded-xl p-8 w-full max-w-2xl mx-auto">
-      <div className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-4">Description</div>
-      <div className="mb-2 text-base text-gray-700 dark:text-gray-300">
-        This practice test will allow you to measure your Python skills at the beginner level by the way of various multiple choice questions. We recommend you to score at least 75% in this test before moving to the next level questionnaire. It will help you in identifying your strength and development areas. Based on the same you can plan your next steps in learning Python and preparing for job placements.
-      </div>
-      <div className="mb-4 text-sm text-primary-600">#Python #Coding #Software #MCQ #Beginner #Programming Language</div>
-      <div className="text-2xl font-semibold text-gray-800 dark:text-gray-100 mt-6 mb-4">Test Instructions</div>
-      <ol className="list-decimal list-inside space-y-2 mb-6">
-        <li>This Practice Test consists of only <strong>MCQ questions.</strong></li>
-        <li>There are a total of <strong>40 questions.</strong> Test Duration is <strong>30 minutes.</strong></li>
-        <li>There is <strong>Negative Marking</strong> for wrong answers.</li>
-        <li><strong>Do Not switch tabs</strong> while taking the test. <strong>Switching Tabs will Block / End the test automatically.</strong></li>
-        <li>The test will only run in <strong>full screen mode.</strong> Do not switch back to tab mode. Test will end automatically.</li>
-        <li>You may need to use blank sheets for rough work. Please arrange for blank sheets before starting.</li>
-        <li>Clicking on Back or Next will save the answer.</li>
-        <li>Questions can be reattempted till the time test is running.</li>
-        <li>Click on the finish test once you are done with the test.</li>
-        <li>You will be able to view the scores once your test is complete.</li>
-      </ol>
-      <div className="text-2xl font-semibold text-gray-800 dark:text-gray-100 mt-6 mb-2">Confirmation</div>
-      <div className="mb-4 text-base text-gray-700 dark:text-gray-300">
-        Your actions shall be proctored and any signs of wrongdoing may lead to suspension or cancellation of your test.
-      </div>
-      <div className="flex flex-col items-center gap-4 mt-4">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={certify}
-            onChange={handleCertifyChange}
-            className="form-checkbox h-5 w-5 text-primary-600 focus:ring-primary-500"
+    <Card>
+      <CardContent>
+        <Typography variant="h2" mb={3}>
+          Description
+        </Typography>
+        <Typography>
+          This practice test will allow you to measure your Python skills at the beginner level by
+          the way of various multiple choice questions. We recommend you to score at least 75% in
+          this test before moving to the next level questionnaire. It will help you in identifying
+          your strength and development areas. Based on the same you can plan your next steps in
+          learning Python and preparing for job placements.
+        </Typography>
+
+        <Typography>#Python #Coding #Software #MCQ #Beginner #Programming Language</Typography>
+
+        <>
+          <Typography variant="h3" mb={3} mt={3}>
+            Test Instructions
+          </Typography>
+          <List>
+            <ol>
+              <li>
+                <ListItemText>
+                  <Typography variant="body1">
+                    This Practice Test consists of only <strong>MCQ questions.</strong>
+                  </Typography>
+                </ListItemText>
+              </li>
+              <li>
+                <ListItemText>
+                  <Typography variant="body1">
+                    There are a total of <strong>40 questions.</strong> Test Duration is{' '}
+                    <strong>30 minutes.</strong>
+                  </Typography>
+                </ListItemText>
+              </li>
+              <li>
+                <ListItemText>
+                  <Typography variant="body1">
+                    There is <strong>Negative Marking</strong> for wrong answers.
+                  </Typography>
+                </ListItemText>
+              </li>
+              <li>
+                <ListItemText>
+                  <Typography variant="body1">
+                    <strong>Do Not switch tabs </strong> while taking the test.
+                    <strong> Switching Tabs will Block / End the test automatically.</strong>
+                  </Typography>
+                </ListItemText>
+              </li>
+              <li>
+                <ListItemText>
+                  <Typography variant="body1">
+                    The test will only run in <strong>full screen mode.</strong> Do not switch back
+                    to tab mode. Test will end automatically.
+                  </Typography>
+                </ListItemText>
+              </li>
+              <li>
+                <ListItemText>
+                  <Typography variant="body1">
+                    You may need to use blank sheets for rough work. Please arrange for blank sheets
+                    before starting.
+                  </Typography>
+                </ListItemText>
+              </li>
+              <li>
+                <ListItemText>
+                  <Typography variant="body1">
+                    Clicking on Back or Next will save the answer.
+                  </Typography>
+                </ListItemText>
+              </li>
+              <li>
+                <ListItemText>
+                  <Typography variant="body1">
+                    Questions can be reattempted till the time test is running.
+                  </Typography>
+                </ListItemText>
+              </li>
+              <li>
+                <ListItemText>
+                  <Typography variant="body1">
+                    Click on the finish test once you are done with the test.
+                  </Typography>
+                </ListItemText>
+              </li>
+              <li>
+                <ListItemText>
+                  <Typography variant="body1">
+                    You will be able to view the scores once your test is complete.
+                  </Typography>
+                </ListItemText>
+              </li>
+            </ol>
+          </List>
+        </>
+        <Typography variant="h3" mb={3} mt={3}>
+          Confirmation
+        </Typography>
+        <Typography mb={3}>
+          Your actions shall be proctored and any signs of wrongdoing may lead to suspension or
+          cancellation of your test.
+        </Typography>
+        <Stack direction="column" alignItems="center" spacing={3}>
+          <FormControlLabel
+            control={<Checkbox checked={certify} onChange={handleCertifyChange} color="primary" />}
+            label="I certify that I have carefully read and agree to all of the instructions mentioned above"
           />
-          <span className="text-gray-800 dark:text-gray-100 text-base">
-            I certify that I have carefully read and agree to all of the instructions mentioned above
-          </span>
-        </label>
-        <button
-          className={`px-6 py-2 rounded-lg bg-primary-600 text-white font-semibold shadow hover:bg-primary-700 transition-colors duration-200 ${!certify ? 'opacity-50 cursor-not-allowed' : ''}`}
-          disabled={!certify}
-          onClick={handleTest}
-        >
-          Start Test
-        </button>
-      </div>
-      <Copyright />
-    </div>
+          <Button variant="contained" color="primary" disabled={!certify} onClick={handleTest}>
+            Start Test
+          </Button>
+        </Stack>
+      </CardContent>
+    </Card>
   );
 };
 
@@ -80,14 +187,26 @@ const imgUrl =
 
 export default function ExamDetails() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-12 h-screen">
-      <div
-        className="hidden md:block md:col-span-7 h-full bg-cover bg-center"
-        style={{ backgroundImage: `url(${imgUrl})` }}
-      ></div>
-      <div className="col-span-1 md:col-span-5 h-full flex items-center justify-center bg-white dark:bg-gray-900">
-        <DescriptionAndInstructions />
-      </div>
-    </div>
+    <>
+      <Grid container sx={{ height: '100vh' }}>
+        <Grid
+          item
+          xs={false}
+          sm={4}
+          md={7}
+          sx={{
+            backgroundImage: `url(${imgUrl})`, // 'url(https://source.unsplash.com/random?wallpapers)',
+            backgroundRepeat: 'no-repeat',
+            backgroundColor: (t) =>
+              t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
+        <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
+          <DescriptionAndInstructions />
+        </Grid>
+      </Grid>
+    </>
   );
 }

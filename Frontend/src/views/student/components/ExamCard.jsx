@@ -1,35 +1,54 @@
 import * as React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CardMedia from '@mui/material/CardMedia';
+import Typography from '@mui/material/Typography';
+import { CardActionArea, Rating, Stack } from '@mui/material';
+import { Link, useNavigate } from 'react-router-dom';
 
 const imgUrl =
   'https://images.unsplash.com/photo-1555949963-aa79dcee981c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fGNvbXB1dGVyJTIwc2NpZW5jZXxlbnwwfHwwfHx8MA%3D%3D&w=1000&q=80';
-
-export default function ExamCard({ exam }) {
-  const { subject, duration, total_que, exam_id, active_date, expire_date, type } = exam;
-  // handling routes
+export default function ExamCard({ exam, attempted }) {
+  const { examName, duration, totalQuestions, examId, liveDate, deadDate } = exam;
   const navigate = useNavigate();
-  const isExamActive = true; // Date.now() >= active_date && Date.now() <= expire_date;
+  const isExamActive = true; // Date.now() >= liveDate && Date.now() <= deadDate;
   const handleCardClick = () => {
-    if (isExamActive) {
-      navigate(`/exam/${exam_id}`);
+    if (attempted) {
+      toast.info('This test already attempted');
+      return;
     }
-    console.log('Exam not Live yet ');
+    if (isExamActive) {
+      navigate(`/exam/${examId}`);
+    }
   };
 
   return (
-    <div
-      className="shadow-lg rounded-xl overflow-hidden bg-white dark:bg-gray-900 cursor-pointer transition-transform hover:scale-[1.02]"
-      onClick={handleCardClick}
-    >
-      <img src={imgUrl} alt="exam" className="w-full h-36 object-cover" />
-      <div className="p-4 flex flex-col gap-2">
-        <div className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-1">{subject}</div>
-        <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">{type}</div>
-        <div className="flex flex-row items-center justify-between mt-1">
-          <span className="text-lg font-bold text-gray-800 dark:text-gray-100">{total_que} ques</span>
-          <span className="text-gray-400 text-base">{duration}</span>
-        </div>
-      </div>
-    </div>
+    <Card>
+      <CardActionArea onClick={handleCardClick}>
+        <CardMedia component="img" height="140" image={imgUrl} alt="green iguana" />
+        <CardContent>
+          <Typography gutterBottom variant="h5" component="div">
+            {examName}
+            {attempted && (
+              <span style={{ marginLeft: 8, color: 'green', fontWeight: 'bold', fontSize: '1rem', border: '1px solid green', borderRadius: 4, padding: '2px 6px' }}>
+                Submitted
+              </span>
+            )}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            MCQ
+          </Typography>
+          <Stack direction="row" alignItems="center" justifyContent="space-between" mt={1}>
+            <Stack direction="row" alignItems="center">
+              <Typography variant="h6"> {totalQuestions}ques</Typography>
+            </Stack>
+            <Typography color="textSecondary" ml={1} sx={{}}>
+              {duration}
+            </Typography>
+          </Stack>
+        </CardContent>
+      </CardActionArea>
+    </Card>
   );
 }

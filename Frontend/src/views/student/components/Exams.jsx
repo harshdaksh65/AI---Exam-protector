@@ -1,59 +1,44 @@
 import React from 'react';
+import { Grid, Typography } from '@mui/material';
+import PageContainer from 'src/components/container/PageContainer';
 import BlankCard from '../../../components/shared/BlankCard';
 import ExamCard from './ExamCard';
-
-const userExam = [
-  {
-    exam_id: 1,
-    subject: 'Theory Of Computation',
-    duration: '30min',
-    active_date: '10 Sept 2023',
-    total_que: 30,
-    expire_date: '11 sept 2023',
-    Exam_link_code: 133,
-    type: 'MCQ',
-  },
-  {
-    exam_id: 2,
-    subject: 'Theory Of Computation',
-    duration: '30min',
-    active_date: '10 Sept 2023',
-    total_que: 30,
-    expire_date: '11 sept 2023',
-    Exam_link_code: 3233,
-    type: 'MCQ',
-  },
-  {
-    exam_id: 3,
-    subject: 'Theory Of Computation',
-    duration: '30min',
-    active_date: '10 Sept 2023',
-    total_que: 30,
-    expire_date: '11 sept 2023',
-    Exam_link_code: 123,
-    type: 'MCQ',
-  },
-  {
-    exam_id: 4,
-    subject: 'Theory Of Computation',
-    duration: '30min',
-    active_date: '10 Sept 2023',
-    total_que: 30,
-    expire_date: '11 sept 2023',
-    Exam_link_code: 233,
-    type: 'MCQ',
-  },
-];
+import { useSelector } from 'react-redux';
+import { useGetStudentResultsQuery } from 'src/slices/resultApiSlice';
+import { useGetExamsQuery } from 'src/slices/examApiSlice';
 
 const Exams = () => {
+  // All hooks at top level
+  const { data: userExams, isLoading, isError } = useGetExamsQuery();
+  const { userInfo } = useSelector((state) => state.auth);
+  const studentId = userInfo?._id;
+  const { data: studentResults, isLoading: isResultsLoading, isError: isResultsError } = useGetStudentResultsQuery(studentId);
+
+  if (isLoading || isResultsLoading) {
+    return <div>Loading...</div>;
+  }
+  if (isError || isResultsError) {
+    return <div>Error fetching exams or results.</div>;
+  }
+
+  // Build a set of attempted examIds for fast lookup
+  const attemptedExamIds = new Set((studentResults || []).map(r => r.exam));
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {userExam.map((exam, index) => (
-        <BlankCard key={index}>
-          <ExamCard exam={exam} />
-        </BlankCard>
-      ))}
-    </div>
+    <PageContainer title="Exams" description="List of exams">
+      <Grid container spacing={3}>
+        {userExams.map((exam) => {
+          const attempted = attemptedExamIds.has(exam.examId);
+          return (
+            <Grid item sm={6} md={4} lg={3} key={exam._id}>
+              <BlankCard>
+                <ExamCard exam={exam} attempted={attempted} />
+              </BlankCard>
+            </Grid>
+          );
+        })}
+      </Grid>
+    </PageContainer>
   );
 };
 
