@@ -1,3 +1,12 @@
+// Batch: Get multiple results by IDs
+const getResultsBatch = asyncHandler(async (req, res) => {
+  const { resultIds } = req.body;
+  if (!Array.isArray(resultIds) || resultIds.length === 0) {
+    return res.status(400).json({ error: 'No resultIds provided' });
+  }
+  const results = await Result.find({ _id: { $in: resultIds } });
+  res.status(200).json(results);
+});
 import Question from "../models/quesModel.js";
 
 // Create result for a student after exam submission
@@ -95,4 +104,4 @@ const updateResultStatus = asyncHandler(async (req, res) => {
   res.status(200).json(result);
 });
 
-export { getResultsByExam, getStudentResult, updateResultStatus, getAllResultsForStudent, createStudentResult };
+export { getResultsByExam, getStudentResult, updateResultStatus, getAllResultsForStudent, createStudentResult, getResultsBatch };
