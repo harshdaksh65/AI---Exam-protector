@@ -1,7 +1,7 @@
 import React, { lazy } from 'react';
+// import { useSelector } from 'react-redux';
 import { Navigate, Route, createBrowserRouter, createRoutesFromElements } from 'react-router-dom';
 import Loadable from '../layouts/full/shared/loadable/Loadable';
-import { useSelector } from 'react-redux';
 
 /* ***Layouts**** */
 const BlankLayout = Loadable(lazy(() => import('../layouts/blank/BlankLayout')));
@@ -75,7 +75,6 @@ const Router = createBrowserRouter(
         {/* <Route path="*" element={<Navigate to="/auth/404" />} /> */}
       </Route>
     </>,
-  ),
+  )
 );
-
 export default Router;

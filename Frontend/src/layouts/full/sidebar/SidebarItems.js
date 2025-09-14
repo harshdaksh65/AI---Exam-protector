@@ -15,24 +15,26 @@ const SidebarItems = () => {
     <Box sx={{ px: 3 }}>
       <List sx={{ pt: 0 }} className="sidebarNav">
         {Menuitems.map((item) => {
-          // Check if the user is a student and if the item should be hidden
+          // Hide teacher-only items for students
           if (
             userInfo.role === 'student' &&
             ['Create Exam', 'Add Questions', 'Exam Logs'].includes(item.title)
           ) {
-            return null; // Don't render this menu item for students
+            return null;
           }
-          // {/********SubHeader**********/}
+          // Hide student-only items for teachers
+          if (
+            userInfo.role === 'teacher' &&
+            item.title === 'Result'
+          ) {
+            return null;
+          }
+          // Hide "Teacher" subheader for students
           if (item.subheader) {
-            // Check if the user is a student and if the subheader should be hidden
             if (userInfo.role === 'student' && item.subheader === 'Teacher') {
-              return null; // Don't render the "Teacher" subheader for students
+              return null;
             }
-
             return <NavGroup item={item} key={item.subheader} />;
-
-            // {/********If Sub Menu**********/}
-            /* eslint no-else-return: "off" */
           } else {
             return <NavItem item={item} key={item.id} pathDirect={pathDirect} />;
           }

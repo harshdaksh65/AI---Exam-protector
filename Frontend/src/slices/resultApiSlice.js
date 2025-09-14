@@ -4,6 +4,13 @@ const RESULTS_URL = '/api/results';
 
 export const resultApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
+    // Teacher: Get all results for an exam
+    getResultsByExam: builder.query({
+      query: (examId) => ({
+        url: `${RESULTS_URL}/exam/${examId}`,
+        method: 'GET',
+      }),
+    }),
     // Get all results for a student
     getStudentResults: builder.query({
       query: (studentId) => ({
@@ -32,4 +39,4 @@ export const resultApiSlice = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useGetStudentResultsQuery, useUpdateResultStatusMutation, useSubmitStudentResultMutation } = resultApiSlice;
+export const { useGetStudentResultsQuery, useUpdateResultStatusMutation, useSubmitStudentResultMutation, useGetResultsByExamQuery } = resultApiSlice;

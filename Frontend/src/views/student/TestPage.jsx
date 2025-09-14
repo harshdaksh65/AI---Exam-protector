@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { useCheckExamAttemptQuery } from 'src/slices/attemptApiSlice';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Box, Grid, CircularProgress, Typography } from '@mui/material';
@@ -21,6 +22,11 @@ const TestPage = () => {
   const { examId, testId } = useParams();
   const { userInfo } = useSelector((state) => state.auth);
   const studentId = userInfo?._id;
+
+  // Block teachers from attempting exams
+  if (userInfo?.role === 'teacher') {
+    return <Navigate to="/dashboard" replace />;
+  }
   const { data: attemptData, isLoading: isAttemptLoading } = useCheckExamAttemptQuery({ examId, studentId });
 
   const [selectedExam, setSelectedExam] = useState([]);

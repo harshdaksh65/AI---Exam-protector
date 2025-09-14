@@ -20,9 +20,8 @@ import { useGetResultsByIdsQuery } from '../../../slices/resultApiSlice.batch';
 import { useGetExamsQuery } from 'src/slices/examApiSlice';
 import { useGetCheatingLogsQuery } from 'src/slices/cheatingLogApiSlice';
 
-export default function CheatingTable() {
+export default function CheatingTable({ selectedExamId, setSelectedExamId }) {
   const [filter, setFilter] = useState('');
-  const [selectedExamId, setSelectedExamId] = useState('');
   const [cheatingLogs, setCheatingLogs] = useState([]);
   const [resultStatusMap, setResultStatusMap] = useState({});
   const { userInfo } = useSelector((state) => state.auth); // teacher info

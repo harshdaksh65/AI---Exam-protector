@@ -74,7 +74,9 @@ const getAllResultsForStudent = asyncHandler(async (req, res) => {
 // Get all results for an exam (teacher view)
 const getResultsByExam = asyncHandler(async (req, res) => {
   const { examId } = req.params;
-  const results = await Result.find({ exam: examId }).populate("student", "name email role");
+  const results = await Result.find({ exam: examId })
+    .populate("student", "name email role")
+    .populate("exam", "examName");
   res.status(200).json(results);
 });
 

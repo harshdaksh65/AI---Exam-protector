@@ -3,6 +3,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Typography, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import { Navigate } from 'react-router-dom';
 import PageContainer from 'src/components/container/PageContainer';
 import DashboardCard from '../../components/shared/DashboardCard';
 import { useGetStudentResultsQuery } from 'src/slices/resultApiSlice';
@@ -11,6 +12,11 @@ const ResultPage = () => {
   const { userInfo } = useSelector((state) => state.auth);
   const studentId = userInfo?._id;
   const { data: results, isLoading } = useGetStudentResultsQuery(studentId);
+
+  // Redirect teachers away from /result
+  if (userInfo?.role === 'teacher') {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
     <PageContainer title="Result Page" description="Your exam results">
