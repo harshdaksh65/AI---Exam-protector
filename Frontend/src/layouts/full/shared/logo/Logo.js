@@ -1,20 +1,25 @@
 import { Link } from 'react-router-dom';
-import { ReactComponent as LogoDark } from 'src/assets/images/logos/dark-logo.svg';
 import { styled } from '@mui/material';
+// Logo image is now served from public folder
 
 const LinkStyled = styled(Link)(() => ({
-  height: '70px',
-  width: '180px',
+  height: '100px',
+  width: '260px',
   overflow: 'hidden',
-  display: 'block',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  margin: '0 auto',
+  textDecoration: 'none',
 }));
+
 
 const Logo = () => {
   return (
     <LinkStyled to="/">
-      <LogoDark height={70} />
+  <img src="/dark-logo.svg" alt="Exam Shield Logo" height={100} />
     </LinkStyled>
-  )
-};
+  );
+}
 
 export default Logo;

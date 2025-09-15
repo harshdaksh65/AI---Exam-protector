@@ -1,3 +1,4 @@
+import StudentSnapshotsPage from './../views/teacher/StudentSnapshotsPage';
 import React, { lazy } from 'react';
 // import { useSelector } from 'react-redux';
 import { Navigate, Route, createBrowserRouter, createRoutesFromElements } from 'react-router-dom';
@@ -54,6 +55,7 @@ const Router = createBrowserRouter(
             <Route path="/create-exam" exact={true} element={<CreateExamPage />} />
             <Route path="/add-questions" exact={true} element={<AddQuestions />} />
             <Route path="/exam-log" exact={true} element={<ExamLogPage />} />
+            <Route path="/teacher/snapshots/:studentId/:examId" exact={true} element={<StudentSnapshotsPage />} />
           </Route>
         </Route>
         <Route path="/" element={<ExamLayout />}>

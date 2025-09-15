@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import axios from 'axios';
 import * as tf from '@tensorflow/tfjs';
 import * as cocossd from '@tensorflow-models/coco-ssd';
 import Webcam from 'react-webcam';
@@ -8,8 +9,14 @@ import { Box, Card } from '@mui/material';
 import swal from 'sweetalert';
 
 export default function Home({ cheatingLog, updateCheatingLog }) {
+  const mediaRecorderRef = useRef(null);
+  const [recording, setRecording] = useState(false);
+  const [videoBlob, setVideoBlob] = useState(null);
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
+  // Get studentId and examId from cheatingLog
+  const studentId = cheatingLog?.studentId || cheatingLog?._id || null;
+  const examId = cheatingLog?.examId || null;
 
   const runCoco = async () => {
     const net = await cocossd.load();
@@ -83,7 +90,58 @@ export default function Home({ cheatingLog, updateCheatingLog }) {
   };
   useEffect(() => {
     runCoco();
-  }, []);
+    // Start video recording when webcam is ready
+    let mediaStream = null;
+    let recorder = null;
+    let chunks = [];
+    const startRecording = async () => {
+      if (webcamRef.current && webcamRef.current.stream) {
+        mediaStream = webcamRef.current.stream;
+        recorder = new window.MediaRecorder(mediaStream, { mimeType: 'video/webm' });
+        mediaRecorderRef.current = recorder;
+        recorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) {
+            chunks.push(e.data);
+          }
+        };
+        recorder.onstop = async () => {
+          const blob = new Blob(chunks, { type: 'video/webm' });
+          setVideoBlob(blob);
+          // Automatically upload video to backend
+          if (blob && studentId && examId) {
+            const formData = new FormData();
+            formData.append('video', blob, `exam_${examId}_student_${studentId}.webm`);
+            formData.append('studentId', studentId);
+            formData.append('examId', examId);
+            try {
+              await axios.post('/api/videos', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+              });
+              console.log('Video uploaded successfully');
+            } catch (err) {
+              console.error('Video upload failed:', err);
+            }
+          }
+        };
+        recorder.start();
+        setRecording(true);
+      }
+    };
+    // Wait for webcam to be ready
+    const interval = setInterval(() => {
+      if (webcamRef.current && webcamRef.current.stream && !recording) {
+        startRecording();
+        clearInterval(interval);
+      }
+    }, 500);
+    return () => {
+      // Stop recording and upload when component unmounts
+      if (mediaRecorderRef.current && recording) {
+        mediaRecorderRef.current.stop();
+        setRecording(false);
+      }
+    };
+  }, [studentId, examId, recording]);
 
   return (
     <Box>

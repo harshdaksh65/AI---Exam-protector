@@ -17,10 +17,12 @@ import {
 } from '@mui/material';
 
 import { useGetResultsByIdsQuery } from '../../../slices/resultApiSlice.batch';
+import { useNavigate } from 'react-router-dom';
 import { useGetExamsQuery } from 'src/slices/examApiSlice';
 import { useGetCheatingLogsQuery } from 'src/slices/cheatingLogApiSlice';
 
 export default function CheatingTable({ selectedExamId, setSelectedExamId }) {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState('');
   const [cheatingLogs, setCheatingLogs] = useState([]);
   const [resultStatusMap, setResultStatusMap] = useState({});
@@ -175,6 +177,12 @@ export default function CheatingTable({ selectedExamId, setSelectedExamId }) {
                       >
                         {!log.resultId ? 'No Result' : (isUpdating ? 'Updating...' : 'Update')}
                       </button>
+                       <button
+                         style={{ padding: '4px 12px', borderRadius: '4px', background: '#2D9CDB', color: '#fff', border: 'none', cursor: 'pointer' }}
+                         onClick={() => navigate(`/teacher/snapshots/${log.studentId || log._id}/${selectedExamId}`)}
+                       >
+                         View Webcam
+                       </button>
                     </Box>
                   </TableCell>
                 </TableRow>
