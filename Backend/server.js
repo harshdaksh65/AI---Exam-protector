@@ -32,6 +32,9 @@ app.use("/api/results", resultRoutes);
 app.use("/api/attempts", attemptRoutes);
 app.use("/api/snapshots", snapshotRoutes);
 app.use("/api/videos", videoRoutes);
+app.get('/', (req, res) => {
+  res.send('API is running');
+});
 
 // Custom Middlewares
 app.use(notFound);
