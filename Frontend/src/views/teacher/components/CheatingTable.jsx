@@ -28,7 +28,9 @@ export default function CheatingTable({ selectedExamId, setSelectedExamId }) {
   const [updateResultStatus, { isLoading: isUpdating }] = useUpdateResultStatusMutation();
 
   const { data: examsData } = useGetExamsQuery();
-  const { data: cheatingLogsData, isLoading } = useGetCheatingLogsQuery(selectedExamId);
+  // Only fetch logs if selectedExamId is set
+  const skipLogs = !selectedExamId;
+  const { data: cheatingLogsData, isLoading } = useGetCheatingLogsQuery(selectedExamId, { skip: skipLogs });
 
   useEffect(() => {
     if (examsData && examsData.length > 0) {
@@ -38,6 +40,7 @@ export default function CheatingTable({ selectedExamId, setSelectedExamId }) {
 
   useEffect(() => {
     if (cheatingLogsData) {
+      console.log('Fetched cheatingLogsData:', cheatingLogsData);
       setCheatingLogs(cheatingLogsData);
       // Initialize resultStatusMap for dropdowns
       const initialMap = {};
@@ -53,6 +56,9 @@ export default function CheatingTable({ selectedExamId, setSelectedExamId }) {
       log.username.toLowerCase().includes(filter.toLowerCase()) ||
       log.email.toLowerCase().includes(filter.toLowerCase()),
   );
+  useEffect(() => {
+    console.log('Filtered cheating logs for table:', filteredUsers);
+  }, [filteredUsers]);
 
 
   // Collect all resultIds from filtered logs

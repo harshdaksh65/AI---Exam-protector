@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
@@ -13,7 +14,12 @@ export default function ExamCard({ exam, attempted }) {
   const { examName, duration, totalQuestions, examId, liveDate, deadDate } = exam;
   const navigate = useNavigate();
   const isExamActive = true; // Date.now() >= liveDate && Date.now() <= deadDate;
+  const { userInfo } = useSelector((state) => state.auth);
   const handleCardClick = () => {
+    if (userInfo?.role === 'teacher') {
+      toast.error('You are not allowed to attempt the test as you are a teacher');
+      return;
+    }
     if (attempted) {
       toast.info('This test already attempted');
       return;

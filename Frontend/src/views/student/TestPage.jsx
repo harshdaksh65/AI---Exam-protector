@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
-import { useCheckExamAttemptQuery } from 'src/slices/attemptApiSlice';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { Box, Grid, CircularProgress, Typography } from '@mui/material';
 import PageContainer from 'src/components/container/PageContainer';
 import BlankCard from 'src/components/shared/BlankCard';
@@ -12,6 +10,7 @@ import { useGetExamsQuery, useGetQuestionsQuery } from '../../slices/examApiSlic
 import { useSaveCheatingLogMutation } from 'src/slices/cheatingLogApiSlice';
 import { useSelector } from 'react-redux';
 import { useSubmitStudentResultMutation } from 'src/slices/resultApiSlice';
+import { useCheckExamAttemptQuery } from 'src/slices/attemptApiSlice';
 import { toast } from 'react-toastify';
 
 const TestPage = () => {
@@ -22,49 +21,13 @@ const TestPage = () => {
   const { examId, testId } = useParams();
   const { userInfo } = useSelector((state) => state.auth);
   const studentId = userInfo?._id;
-
-  // Block teachers from attempting exams
-  if (userInfo?.role === 'teacher') {
-    return <Navigate to="/dashboard" replace />;
-  }
-  const { data: attemptData, isLoading: isAttemptLoading } = useCheckExamAttemptQuery({ examId, studentId });
-
   const [selectedExam, setSelectedExam] = useState([]);
   const [examDurationInSeconds, setexamDurationInSeconds] = useState(0);
   const { data: userExamdata } = useGetExamsQuery();
-
-  useEffect(() => {
-    if (userExamdata) {
-      const exam = userExamdata.filter((exam) => {
-        return exam.examId === examId;
-      });
-      setSelectedExam(exam);
-      setexamDurationInSeconds(exam[0].duration * 60);
-    }
-  }, [userExamdata]);
-
   const [questions, setQuestions] = useState([]);
   const { data, isLoading } = useGetQuestionsQuery(examId);
   const [score, setScore] = useState(0);
-  const navigate = useNavigate();
-
-  const [saveCheatingLogMutation] = useSaveCheatingLogMutation();
-  // userInfo already declared above
-  const [cheatingLog, setCheatingLog] = useState({
-    noFaceCount: 0,
-    multipleFaceCount: 0,
-    cellPhoneCount: 0,
-    prohibitedObjectCount: 0,
-    examId: examId,
-    username: '',
-    email: '',
-  });
-
-  useEffect(() => {
-    if (data) {
-      setQuestions(data);
-    }
-  }, [data]);
+  const [submitted, setSubmitted] = useState(false);
 
   // Collect answers from child component
   const handleAnswer = (questionId, selectedOptionIndex) => {
@@ -76,55 +39,66 @@ const TestPage = () => {
 
   // Called when student moves to next question
   const handleNextQuestion = () => {
-    const currentQ = questions[currentQuestion];
-    const answerObj = answers.find(a => a.questionId === currentQ?._id);
-    if (answerObj && !answeredAndMoved.includes(currentQ._id)) {
-      setAnsweredAndMoved(prev => [...prev, currentQ._id]);
-    }
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
+    setCurrentQuestion((prev) => Math.min(prev + 1, questions.length - 1));
+    if (!answeredAndMoved.includes(questions[currentQuestion]?._id)) {
+      setAnsweredAndMoved([...answeredAndMoved, questions[currentQuestion]?._id]);
     }
   };
 
-  const [submitted, setSubmitted] = useState(false);
-  const [submitError, setSubmitError] = useState(null);
+  // Called when student submits the test
   const handleTestSubmission = async () => {
-    if (submitted) return;
-    setSubmitError(null);
     try {
-      const logToSend = {
-        ...cheatingLog,
-        username: userInfo.name,
-        email: userInfo.email,
-      };
-      await saveCheatingLogMutation(logToSend).unwrap();
-      // Submit answers to backend for result creation
-      await submitStudentResult({ studentId, examId, answers }).unwrap();
+      console.log('Submitting cheating log:', cheatingLog);
+      const cheatingLogRes = await saveCheatingLogMutation(cheatingLog);
+      console.log('Cheating log mutation result:', cheatingLogRes);
+      // Submit student result (add your actual logic here)
+      await submitStudentResult({ examId, studentId, answers });
       setSubmitted(true);
-      toast.success('Test submitted! Your result will be available soon.');
-      navigate(`/Success`);
+      toast.success('Test submitted!');
+      navigate('/dashboard');
     } catch (error) {
-      setSubmitError(error);
-      if (error && error.data) {
-        console.error('Submission error details:', error.data);
-      } else {
-        console.error('Submission error:', error);
-      }
-      toast.error('Error submitting test or saving logs. Please check your network and try again.');
-      setSubmitted(true);
-      navigate(`/`);
+      console.error('Error submitting test or cheating log:', error);
+      toast.error('Error submitting test or cheating log.');
     }
   };
+  const navigate = useNavigate();
+  const [saveCheatingLogMutation] = useSaveCheatingLogMutation();
+  const [cheatingLog, setCheatingLog] = useState({
+    noFaceCount: 0,
+    multipleFaceCount: 0,
+    cellPhoneCount: 0,
+    prohibitedObjectCount: 0,
+    examId: examId,
+    username: userInfo?.name || userInfo?.username || '',
+    email: userInfo?.email || '',
+  });
+  const { data: attemptData, isLoading: isAttemptLoading } = useCheckExamAttemptQuery({ examId, studentId });
 
-  const saveCheatingLog = async (cheatingLog) => {
-    console.log(cheatingLog);
-  };
+  useEffect(() => {
+    if (userExamdata) {
+      const exam = userExamdata.filter((exam) => exam.examId === examId);
+      setSelectedExam(exam);
+      setexamDurationInSeconds(exam[0].duration * 60);
+    }
+  }, [userExamdata]);
+
+  useEffect(() => {
+    if (data) {
+      setQuestions(data);
+    }
+  }, [data]);
+
+  // Block teachers from attempting exams
+  if (userInfo?.role === 'teacher') {
+    return <Navigate to="/dashboard" replace />;
+  }
   if (isAttemptLoading) {
     return <Box textAlign="center" mt={8}><CircularProgress /><Typography>Checking exam attempt...</Typography></Box>;
   }
   if (attemptData?.attempted) {
     return <Box textAlign="center" mt={8}><Typography variant="h5" color="error">You have already attempted this exam.</Typography></Box>;
   }
+
   return (
     <PageContainer title="TestPage" description="This is TestPage">
       <Box pt="3rem">

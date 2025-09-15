@@ -6,6 +6,9 @@ import CheatingLog from "../models/cheatingLogModel.js";
 // @access Private
 const saveCheatingLog = asyncHandler(async (req, res) => {
   console.log('Cheating log request body:', req.body);
+    // Debug: Log all fields received
+    const debugFields = ['noFaceCount', 'multipleFaceCount', 'cellPhoneCount', 'prohibitedObjectCount', 'examId', 'username', 'email'];
+    debugFields.forEach(f => console.log(`${f}:`, req.body[f]));
   const {
     noFaceCount,
     multipleFaceCount,
