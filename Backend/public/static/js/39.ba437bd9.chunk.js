@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkmodernize=self.webpackChunkmodernize||[]).push([[39],{4039:(e,r,s)=>{s.r(r),s.d(r,{default:()=>o});var a=s(7689),t=s(5048),n=s(184);const o=()=>{const{userInfo:e}=(0,t.v9)((e=>e.auth));return"teacher"===e.role?(0,n.jsx)(a.j3,{}):(0,n.jsx)(a.Fg,{to:"/dashboard",replace:!0})}}}]);
+//# sourceMappingURL=39.ba437bd9.chunk.js.map

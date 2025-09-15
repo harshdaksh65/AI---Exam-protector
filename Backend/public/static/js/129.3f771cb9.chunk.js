@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkmodernize=self.webpackChunkmodernize||[]).push([[129],{7129:(e,s,n)=>{n.r(s),n.d(s,{default:()=>a});var r=n(7689),t=n(5048),u=n(184);const a=()=>{const{userInfo:e}=(0,t.v9)((e=>e.auth));return e?(0,u.jsx)(r.j3,{}):(0,u.jsx)(r.Fg,{to:"/auth/login",replace:!0})}}}]);
+//# sourceMappingURL=129.3f771cb9.chunk.js.map

@@ -19,9 +19,15 @@ connectDB();
 const app = express();
 const port = process.env.PORT || 5000;
 
+import cors from "cors";
+app.use(cors());
+import path from "path";
+
+
 // to parse req boy
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(path.resolve(), "/public")));
 app.use(cookieParser());
 
 // Routes
@@ -34,6 +40,10 @@ app.use("/api/snapshots", snapshotRoutes);
 app.use("/api/videos", videoRoutes);
 app.get('/', (req, res) => {
   res.send('API is running');
+});
+
+app.get('*name', (req, res) => {
+  res.sendFile(path.join(path.resolve(), '/public/index.html'));
 });
 
 // Custom Middlewares
