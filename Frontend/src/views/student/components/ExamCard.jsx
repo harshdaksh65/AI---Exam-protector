@@ -15,13 +15,14 @@ export default function ExamCard({ exam, attempted }) {
   const navigate = useNavigate();
   const isExamActive = true; // Date.now() >= liveDate && Date.now() <= deadDate;
   const { userInfo } = useSelector((state) => state.auth);
-  const handleCardClick = () => {
+  const handleCardClick = (e) => {
     if (userInfo?.role === 'teacher') {
       toast.error('You are not allowed to attempt the test as you are a teacher');
       return;
     }
     if (attempted) {
       toast.info('This test already attempted');
+      e.preventDefault();
       return;
     }
     if (isExamActive) {
@@ -31,7 +32,10 @@ export default function ExamCard({ exam, attempted }) {
 
   return (
     <Card>
-      <CardActionArea onClick={handleCardClick}>
+      <CardActionArea
+        onClick={handleCardClick}
+        style={attempted ? { pointerEvents: 'auto', opacity: 0.7, cursor: 'not-allowed' } : {}}
+      >
         <CardMedia component="img" height="140" image={imgUrl} alt="green iguana" />
         <CardContent>
           <Typography gutterBottom variant="h5" component="div">

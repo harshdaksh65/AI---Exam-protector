@@ -13,6 +13,11 @@ import Question from "../models/quesModel.js";
 const createStudentResult = asyncHandler(async (req, res) => {
   console.log('Result submission request body:', req.body);
   const { studentId, examId, answers } = req.body; // answers: [{questionId, selectedOptionIndex}]
+  // Find the exam document by examId string
+  const examDoc = await import('../models/examModel.js').then(m => m.default.findOne({ examId }));
+  if (!examDoc) {
+    return res.status(400).json({ error: 'Exam not found' });
+  }
   // Fetch all questions for the exam
   const questions = await Question.find({ examId });
   let correctCount = 0;
@@ -28,7 +33,7 @@ const createStudentResult = asyncHandler(async (req, res) => {
   const totalQuestions = questions.length;
   const percentageScore = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
   // Upsert result (update if exists, else create)
-  let result = await Result.findOne({ student: studentId, exam: examId });
+  let result = await Result.findOne({ student: studentId, exam: examDoc._id });
   if (result) {
     result.score = percentageScore;
     // Do NOT overwrite status here; keep teacher's status
@@ -39,7 +44,7 @@ const createStudentResult = asyncHandler(async (req, res) => {
   } else {
     result = new Result({
       student: studentId,
-      exam: examId,
+      exam: examDoc._id,
       score: percentageScore,
       status: "pending",
     });
@@ -67,7 +72,7 @@ import Result from "../models/resultModel.js";
 // Get all results for a student (student view)
 const getAllResultsForStudent = asyncHandler(async (req, res) => {
   const { studentId } = req.params;
-  const results = await Result.find({ student: studentId }).populate("exam");
+  const results = await Result.find({ student: studentId }).populate("exam", "examName");
   res.status(200).json(results);
 });
 

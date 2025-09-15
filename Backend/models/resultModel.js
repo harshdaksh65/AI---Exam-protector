@@ -8,7 +8,8 @@ const resultSchema = mongoose.Schema(
       required: true,
     },
     exam: {
-      type: String, // Store examId as string (UUID)
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Exam",
       required: true,
     },
     score: {

@@ -21,14 +21,14 @@ const Exams = () => {
     return <div>Error fetching exams or results.</div>;
   }
 
-  // Build a set of attempted examIds for fast lookup
-  const attemptedExamIds = new Set((studentResults || []).map(r => r.exam));
+  // Build a set of attempted exam ObjectIds for fast lookup
+  const attemptedExamIds = new Set((studentResults || []).map(r => r.exam && r.exam._id));
 
   return (
     <PageContainer title="Exams" description="List of exams">
       <Grid container spacing={3}>
         {userExams.map((exam) => {
-          const attempted = attemptedExamIds.has(exam.examId);
+          const attempted = attemptedExamIds.has(exam._id);
           return (
             <Grid item sm={6} md={4} lg={3} key={exam._id}>
               <BlankCard>
