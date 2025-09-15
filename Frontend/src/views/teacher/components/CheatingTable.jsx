@@ -118,6 +118,7 @@ export default function CheatingTable({ selectedExamId, setSelectedExamId }) {
               <TableCell>Multiple Face Count</TableCell>
               <TableCell>Cell Phone Count</TableCell>
               <TableCell>Prohibited Object Count</TableCell>
+              <TableCell>Score (%)</TableCell>
               <TableCell>Result Status</TableCell>
             </TableRow>
           </TableHead>
@@ -126,6 +127,7 @@ export default function CheatingTable({ selectedExamId, setSelectedExamId }) {
               // Find the result for this log
               const batchResult = batchResults?.find(r => r._id === log.resultId);
               const liveStatus = batchResult?.status || 'pending';
+              const score = batchResult?.score !== undefined ? `${batchResult.score}%` : '--';
               return (
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
@@ -135,6 +137,7 @@ export default function CheatingTable({ selectedExamId, setSelectedExamId }) {
                   <TableCell>{log.multipleFaceCount}</TableCell>
                   <TableCell>{log.cellPhoneCount}</TableCell>
                   <TableCell>{log.prohibitedObjectCount}</TableCell>
+                  <TableCell>{score}</TableCell>
                   <TableCell>
                     <Box display="flex" alignItems="center" gap={1}>
                       <Select
